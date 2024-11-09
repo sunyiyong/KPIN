@@ -29,8 +29,6 @@ class AutoRegressive:
       ar_eps_ratio = global_vars.ar_Call_eps_ratio
       std_vt = global_vars.init_std_vt
 
-      print("Yule-Walker Equations for AR(" + str(p) + ") begins")
-
       y_train_temp = global_vars.init_y[:, ar_train_start: ar_train_start + ar_train_len]
       mean_y = np.mean(y_train_temp, 1)
       y_train = y_train_temp - mean_y[:, np.newaxis]
@@ -40,7 +38,7 @@ class AutoRegressive:
       P = np.sqrt(rho) * np.kron(P.T, np.eye(N))
       self.cov_vt = (std_vt ** 2) * np.eye(tau * N)
 
-      # Yule-Walker Equations
+      # Compute C_k
       for k in range(0, p + 1):
          if k == 0:
             Y_tk    = y_train
@@ -66,7 +64,7 @@ class AutoRegressive:
             else:
                self.C_all[i*M*N:(i+1)*M*N, j*M*N:(j+1)*M*N] = np.conj( Ctemp[(j-i)*M*N:(j-i+1)*M*N,:] ).T
 
-      # # Small Perturbation
+      # Small Perturbation
       self.ar_eig_vals       = np.linalg.eigvals( self.C_all )
       self.ar_eig_abs        = np.abs( self.ar_eig_vals )
       self.ar_sorted_indices = np.argsort(self.ar_eig_abs)[::-1]
@@ -74,7 +72,7 @@ class AutoRegressive:
       self.ar_eps            = self.ar_eig_abs_sorted[global_vars.ar_Call_fall_index] / ar_eps_ratio
       C_all_perturbed        = self.C_all + self.ar_eps * np.eye(p*M*N)
 
-      # solve Y-W Equations
+      # Solve Yule-Walker Equations
       Phi_H = np.linalg.solve( C_all_perturbed, Ctemp[M*N:,:] )
       self.Phi = np.conj( Phi_H ).T
       self.cov_ut_wrong = Ctemp[:M*N,:] - np.dot( self.Phi, Ctemp[M*N:,:] )
@@ -118,9 +116,9 @@ class AutoRegressive:
 
       return self.nmse_ar
 
-   # sample from ut
+   # sample from u_t
    def generate_complex_sample_EVD(self, global_vars, Matrix):
-      assert np.allclose(Matrix,Matrix.T.conj()), "$init_M$不是 Hermitian 矩阵，不能执行Chelosky分解"
+      assert np.allclose(Matrix,Matrix.T.conj()), "Chelosky factorization fails, since $init_M$ is not Hermitian."
 
       len = global_vars.ar_test_len
       m = Matrix.shape[0]

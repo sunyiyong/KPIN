@@ -18,9 +18,9 @@ import gc
 from Global_Variables import Global_Variables
 from Complex_AutoRegressive import AutoRegressive
 from Complex_StateSpaceModel import StateSpaceModel
-from Complex_KFilter import KalmanFilter_hot
-from Complex_Gnet_utils import Gnet, split_dataset_Gnet
-from Complex_Gnet_pipeline import Gnet_pipeline
+from Complex_KFilter import KalmanFilter
+from Complex_KPIN_utils import Gnet, split_dataset_Gnet
+from Complex_KPIN_pipeline import Gnet_pipeline
 from Complex_Plot import Complex_Plot
 
 if torch.cuda.is_available():
@@ -98,32 +98,29 @@ for seed in seed_values:
         print('********************************************')
         print('Dataset: '.format(dataset_folder))
         print('Now params_{} begins: '.format(params_idx) + dataset_file)
-        print('SNR: {}, num_epoch: {}: '.format(SNR_values[0],global_vars.Gnet_pretrain_num_epoch))
+        print('SNR: {}dB, num_epoch: {}: '.format(global_vars.init_SNR, global_vars.KPIN_train_num_epoch))
         print('********************************************')
 
         # AutoRegressive
-        print("AR begins")
         global_vars.AR = AutoRegressive()
         global_vars.AR.solve_yule_walker(global_vars)
         global_vars.AR.predict_ar_results(global_vars)
         global_vars.nmse_ar = global_vars.AR.nmse_ar
 
         # ARKF
-        print("ARKF begins")
-        ssm_hot = StateSpaceModel(global_vars)
-        global_vars.KFilter_hot = KalmanFilter_hot(ssm_hot)
-        global_vars.KFilter_hot.predict_results(global_vars)
-        global_vars.nmse_KFilter_hot = global_vars.KFilter_hot.nmse_KFilter_hot
+        ssm = StateSpaceModel(global_vars)
+        global_vars.KFilter = KalmanFilter(ssm)
+        global_vars.KFilter.predict_results(global_vars)
+        global_vars.nmse_KFilter_hot = global_vars.KFilter.nmse_KFilter_hot
 
         # KPIN
-        print("KPIN begins")
         global_vars.Gnet = Gnet(global_vars)
         global_vars.Gnet_pipe = Gnet_pipeline(global_vars)
         split_dataset_Gnet(global_vars)
         start = time.time()
-        global_vars.Gnet_pipe.Gnet_pretrain(global_vars)
+        global_vars.Gnet_pipe.KPIN_train(global_vars)
         end = time.time()
-        global_vars.time_per_epoch = (end - start) / global_vars.Gnet_pretrain_num_epoch
+        global_vars.time_per_epoch = (end - start) / global_vars.KPIN_train_num_epoch
         print("Time/(epoch) is {:.4f}s".format(global_vars.time_per_epoch))
         torch.cuda.empty_cache()
 

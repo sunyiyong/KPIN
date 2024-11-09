@@ -1,7 +1,7 @@
 """
 This file defines the module we used:
 
-StateSpaceModel: which is for implementing KPIN and ARKF.
+StateSpaceModel class: which is for implementing KPIN.
 
 Author: SUN, Yiyong
 Date: 2024.6.30
@@ -36,7 +36,7 @@ class StateSpaceModel:
         self.m                 = m
         self.n                 = n
 
-        #Transition Model
+        # Transition Model
         eye_matrix        = np.eye( (p-1)*m )
         zeros_matrix      = np.zeros( ((p-1)*m, m) )
         F                 = np.hstack( [eye_matrix, zeros_matrix] )
@@ -49,7 +49,7 @@ class StateSpaceModel:
         self.theta        = torch.from_numpy(theta).to(torch.complex64).to(self.dev)
         self.theta_H      = torch.conj( torch.transpose(self.theta, 0, 1) )
 
-        #Measurement Model
+        # Measurement Model
         zero_vector = np.zeros( (tau*N, (p-1)*m) )
         G           = np.hstack( [P, zero_vector] )
         self.G      = torch.from_numpy(G).to(torch.complex64).to(self.dev)
@@ -57,7 +57,7 @@ class StateSpaceModel:
 
         self.cov_vt = torch.from_numpy(cov_vt).to(torch.complex64).to(self.dev)
 
-        #Initial latent state
+        # Initial latent state
         self.m1x_0  = torch.squeeze( torch.zeros((p*m, 1), dtype = torch.complex64) ).to(self.dev)  # first-order moment
         self.m2x_0  = kfilter_m2x_init_coeff * torch.eye( p*m, dtype= torch.complex64).to(self.dev)  # second-order moment
 

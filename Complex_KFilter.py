@@ -1,7 +1,7 @@
 """
 This file defines the module we used:
 
-KalmanFilter_hot: which is to implement ARKF.
+KalmanFilter class: which is to implement ARKF.
 
 Author: SUN, Yiyong
 Date: 2024.6.30
@@ -11,7 +11,7 @@ import numpy as np
 
 
 
-class KalmanFilter_hot:
+class KalmanFilter:
     # Initialization
     def __init__(self, StateSpaceModel):
 
@@ -105,8 +105,8 @@ class KalmanFilter_hot:
 
     # Compute the Kalman Gain
     def KGain(self):
-        self.KG                 = torch.matmul( self.m2x_prior, self.G_H )
-        m2y_cpu                 = self.m2y.cpu().detach().numpy()
+        self.KG          = torch.matmul( self.m2x_prior, self.G_H )
+        m2y_cpu          = self.m2y.cpu().detach().numpy()
         self.m2y_inv     = np.linalg.inv( m2y_cpu )
         self.m2y_inv_gpu = torch.from_numpy(self.m2y_inv).to(torch.complex64).to(self.dev)
         self.KG          = torch.matmul( self.KG, self.m2y_inv_gpu )
