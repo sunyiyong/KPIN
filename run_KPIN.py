@@ -55,8 +55,8 @@ for seed in seed_values:
     vkmh_values = [60]
     f_values = [28]
     N_values = [32]
-    M_values = [4]
-    SNR_values = [14]
+    M_values = [2]
+    SNR_values = [20]
     ms_scale_values = [1]
 
     file_name_list = []
