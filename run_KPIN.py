@@ -51,7 +51,7 @@ for seed in seed_values:
     current_datetime = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
     print('Now is ' + current_datetime + '' + '     seed={}'.format(seed))
 
-    # scanario parameters
+    # scenario parameters
     vkmh_values = [60]
     f_values = [28]
     N_values = [32]
